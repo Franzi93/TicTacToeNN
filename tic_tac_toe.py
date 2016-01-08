@@ -1,5 +1,6 @@
 import pygame, sys, random, copy
 from pygame.locals import *
+#from TicTacToeBot import TicTacToeBot
 
 ##CONSTANTS, yo##
 
@@ -44,12 +45,17 @@ def main():
 
     pygame.display.set_caption('Tic-Tac-Toe')
 
+  #  bot1 = TicTacToeBot()
+   # bot1.train(100)
+    
+    #bot1.evaluate_action(...)
+
     playerScore = 0
     computerScore = 0
     tieScore = 0
     playerWins = False
     computerWins = False
-
+    mousex = None
     mainBoard = makeEachBoxFalse(False)
     usedBoxes = makeEachBoxFalse(False)
 
@@ -61,24 +67,22 @@ def main():
 
     while True:
         
-  
+        print(mainBoard)
         
 
         for event in pygame.event.get():
             if event.type == QUIT or (event.type == KEYUP and event.key == K_ESCAPE):
                 pygame.quit()
                 sys.exit()
-        """
-            elif event.type == MOUSEMOTION:
-                mousex, mousey = event.pos
+        
+         #   elif event.type == MOUSEMOTION:
+       #         mousex, mousey = event.pos
             elif event.type == MOUSEBUTTONUP:
                 mousex, mousey = event.pos
-        
-        boxx, boxy = getBoxAtPixel(mousex, mousey)
-        """
-        print(player)
-        print(mainBoard)
-        player = makeMove(player,usedBoxes,mainBoard,mainFont)
+        if mousex != None:
+            boxx, boxy = getBoxAtPixel(mousex, mousey)
+    
+            player = makeMove(player,usedBoxes,mainBoard,mainFont,boxx,boxy)
         
         playerWins, computerWins = gameWon(mainBoard)
 
@@ -209,9 +213,21 @@ def centerxAndCenteryOfBox(boxx, boxy):
 ##### Functions dealing with computer and player moves ######
 
 def makeMove(player,usedBoxes,mainBoard, mainFont,boxx = None,boxy = None):
-        if boxx == None and boxy == None:
-            boxx = random.randint(0,2)
-            boxy = random.randint(0,2)
+           
+      #  if boxx == None and boxy == None:        
+        if player == OMARK:
+            spielfeld = [0]*9
+            for y in range(3):
+                for x in range(3):
+                    if mainBoard[x][y] == MARKO:
+                        spielfeld[x+3*y] = 1
+                    if mainBoard[x][y] == MARKX:
+                        spielfeld[x+3*y] = 2                
+            
+            (boxx, boxy) = bot.get_action(spielfeld)
+            #boxx = random.randint(0,2)
+            #boxy = random.randint(0,2)
+            
         if boxx != None and boxy != None:
 
             if not usedBoxes[boxx][boxy]:
@@ -233,7 +249,7 @@ def makeMove(player,usedBoxes,mainBoard, mainFont,boxx = None,boxy = None):
 
 def markBox(player, boxx, boxy, mainFont):
     centerx, centery = centerxAndCenteryOfBox(boxx, boxy)
-    mark = mainFont.render(player, True, WHITE)
+    mark = mainFont.render(player, True, GREEN)
     markRect = mark.get_rect()
     markRect.centerx = centerx
     markRect.centery = centery
