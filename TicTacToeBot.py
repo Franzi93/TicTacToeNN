@@ -33,7 +33,7 @@ class TicTacToeBot:
         self.world = World_Model (self.size_x, self.size_y, self.size_win, self.gravity, initial_stones = self.initial_stones)
         
     def train(self, runs):
-        bot_2 = Bot_Random.Bot_Random_Static()
+        bot_2 = Bot_Random.Bot_Random_Static(3, 3)
         
         for counter in range (runs):
             #Play a game

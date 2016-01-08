@@ -6,7 +6,7 @@ Created on Tue Dec 22 11:26:56 2015
 """
 
 import numpy as np
-import json_tricks
+#import json_tricks
 
 from MLP import MLP
 from Bot_Random import Bot
@@ -131,19 +131,19 @@ class Bot_RL_MLP (Bot):
     """
     Loads 
     """
-    def load_data(self, filename):
-        fo = open(filename , "r")
-        #self.w_mot = json_tricks.load(fo.read())["w_mot"]
-        data = json_tricks.load(fo.read())
-        fo.close()            
-        
-        return data
+    #def load_data(self, filename):
+    #    fo = open(filename , "r")
+    #    #self.w_mot = json_tricks.load(fo.read())["w_mot"]
+    #    data = json_tricks.load(fo.read())
+    #    fo.close()            
+    #    
+    #    return data
          
     """
     Saves
     """
-    def save_data(self, data, filename):
-        data = {"version" : 1, "w_mot" : self.w_mot}
-        fo = open(filename , "w")
-        fo.write(json_tricks.dumps(data))
-        fo.close()
+    #def save_data(self, data, filename):
+    #    data = {"version" : 1, "w_mot" : self.w_mot}
+    #    fo = open(filename , "w")
+    #    fo.write(json_tricks.dumps(data))
+    #    fo.close()
