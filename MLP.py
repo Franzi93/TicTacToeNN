@@ -41,6 +41,7 @@ class MLP:
         self.bias_hidden = np.random.uniform(-1.0, 1.0, (self.hidden_size))
         self.bias_output = np.random.uniform(-1.0, 1.0, (self.output_size))
 
+        self.hidden = None
         #self.W_i = np.random.uniform(-0.2, 0.2, (self.input_size, self.hidden_size))
         #self.W_o = np.random.uniform(-0.2, 0.2, (self.hidden_size, self.output_size))
         #self.bias_hidden = np.random.uniform(-0.2, 0.2, (self.hidden_size))
@@ -92,9 +93,12 @@ class MLP:
     Ermittelt die Ausgangswerte zu den übergebenen Eingangswerten
     """
     def get_action (self, data_input):
-        self.hidden = self.sigmoidAktivierung(self.W_i, data_input, self.bias_hidden)
+        if (self.hidden == None):
+            self.hidden = self.sigmoidAktivierung(self.W_i, data_input, self.bias_hidden)
+            
+        hidden = self.sigmoidAktivierung(self.W_i, data_input, self.bias_hidden)
         
-        output = np.dot(self.hidden, self.W_o) + self.bias_output
+        output = np.dot(hidden, self.W_o) + self.bias_output
             
         return output  
         

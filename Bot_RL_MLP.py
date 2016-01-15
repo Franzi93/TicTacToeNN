@@ -6,8 +6,8 @@ Created on Tue Dec 22 11:26:56 2015
 """
 
 import numpy as np
-#import json_tricks
-
+import json_tricks
+import time
 from MLP import MLP
 from Bot_Random import Bot
 
@@ -41,7 +41,7 @@ class Bot_RL_MLP (Bot):
         
         for i in range(len(self.h)):
             if (self.info[i] > 0):
-                self.h[i] = -100
+                self.h[i] = -10
 
         #Workaround: Wenn nur noch 1 Zug möglich ist, automatisch setzen
         moves = world.get_moves()
@@ -98,6 +98,12 @@ class Bot_RL_MLP (Bot):
     Selects an action
     """
     def rand_winner (self, S_from, beta):
+        #for i in range (len(S_from)):
+        #    if S_from[i] > 200:
+        #        print S_from
+        #        time.sleep(0.2)
+        #print "--------------------\n",S_from
+        #time.sleep(0.2)
         sum = 0.0
         p_i = 0.0
         rnd = np.random.random()
@@ -106,17 +112,23 @@ class Bot_RL_MLP (Bot):
     
         try:
             for i in range (d_r):
-                sum += np.exp (beta * S_from[i])
-        
+                sum += np.exp (beta * min(S_from[i],200))
+            
+            #if field is empty, set reward to 1 for all fields
+            #to get a probablity higher than 0
+            if (sum == 0):
+                sum = d_r
+                S_from = [1]*d_r
+                
             for i in range (d_r):
-                p_i += np.exp (beta * S_from[i]) / sum
+                p_i += np.exp (beta * min(S_from[i],200)) / sum
         
                 if  p_i > rnd:
                     sel = i
                     rnd = 1.1 # out of reach, so the next will not be turned ON
                     
         except Exception:
-            print beta, S_from[i], S_from
+            print beta, S_from[i], S_from, sum
         return sel        
         
     """
@@ -142,8 +154,10 @@ class Bot_RL_MLP (Bot):
     """
     Saves
     """
-    #def save_data(self, data, filename):
-    #    data = {"version" : 1, "w_mot" : self.w_mot}
+    #def save_data(self, filename):
+    #    data = {"bot" : "Bot_RL_MLP", 
+    #            "version" : 1,
+    #            "mlp" : self.mlp}
     #    fo = open(filename , "w")
     #    fo.write(json_tricks.dumps(data))
     #    fo.close()
