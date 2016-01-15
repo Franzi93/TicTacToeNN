@@ -46,7 +46,7 @@ def main():
     pygame.display.set_caption('Tic-Tac-Toe')
 
     bot1 = TicTacToeBot()
-    bot1.train(5000)
+    bot1.train(10000)
     
     #bot1.evaluate_action(...)
 
@@ -66,25 +66,11 @@ def main():
     
 
     while True:
-        
-        print(mainBoard)
-        
-
-        for event in pygame.event.get():
-            if event.type == QUIT or (event.type == KEYUP and event.key == K_ESCAPE):
-                pygame.quit()
-                sys.exit()
-        
-         #   elif event.type == MOUSEMOTION:
-       #         mousex, mousey = event.pos
-            elif event.type == MOUSEBUTTONUP:
-                mousex, mousey = event.pos
-        if mousex != None:
-            boxx, boxy = getBoxAtPixel(mousex, mousey)
-    
-            player = makeMove(bot1,player,usedBoxes,mainBoard,mainFont,boxx,boxy)
+        print(player)
         
         playerWins, computerWins = gameWon(mainBoard)
+
+        
 
         if playerWins:
             pygame.time.wait(500)
@@ -113,6 +99,31 @@ def main():
                 DISPLAYSURF.fill(BGCOLOR)
                 drawLines()
 
+        if player == OMARK:
+            spielfeld = [0]*9
+            for y in range(3):
+                for x in range(3):
+                    if mainBoard[x][y] == OMARK:
+                        spielfeld[x+3*y] = 1
+                    if mainBoard[x][y] == XMARK:
+                        spielfeld[x+3*y] = 2                
+            
+            (boxx, boxy) = bot1.get_action(spielfeld)
+            player = makeMove(bot1,player,usedBoxes,mainBoard,mainFont,boxx,boxy)
+        else:   
+            for event in pygame.event.get():
+                if event.type == QUIT or (event.type == KEYUP and event.key == K_ESCAPE):
+                    pygame.quit()
+                    sys.exit()
+            
+             #   elif event.type == MOUSEMOTION:
+             #   mousex, mousey = event.pos
+                elif event.type == MOUSEBUTTONUP:
+                    mousex, mousey = event.pos
+                    boxx, boxy = getBoxAtPixel(mousex, mousey)
+    
+                    player = makeMove(bot1,player,usedBoxes,mainBoard,mainFont,boxx,boxy)
+                
         
         
 
@@ -213,8 +224,9 @@ def centerxAndCenteryOfBox(boxx, boxy):
 ##### Functions dealing with computer and player moves ######
 
 def makeMove(bot1,player,usedBoxes,mainBoard, mainFont,boxx = None,boxy = None):
-           
-      #  if boxx == None and boxy == None:        
+        '''
+      #  if boxx == None and boxy == None:   
+  
         if player == OMARK:
             spielfeld = [0]*9
             for y in range(3):
@@ -227,7 +239,7 @@ def makeMove(bot1,player,usedBoxes,mainBoard, mainFont,boxx = None,boxy = None):
             (boxx, boxy) = bot1.get_action(spielfeld)
             #boxx = random.randint(0,2)
             #boxy = random.randint(0,2)
-            
+        '''
         if boxx != None and boxy != None:
 
             if not usedBoxes[boxx][boxy]:
