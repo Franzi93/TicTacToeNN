@@ -5,7 +5,7 @@ Created on Fri Oct 23 16:33:00 2015
 
 @author: Ralf Engelken, Franziska Neu
 """
-
+import matplotlib.pyplot as plt
 from World_Model import World_Model
 import Bot_Random
 from Bot_RL_MLP2 import Bot_RL_MLP
@@ -15,16 +15,16 @@ size_x     = 3          #The x-dimension of the board
 size_y     = 3          #The y-dimension of the board
 size_win   = 3          #The number of stones in a row neccessary to win
 gravity    = False      #True : only the x-position is used, the stones always fall down to the bottom-most empty field
-initial_stones = 2      #the number of stones already on the field
+initial_stones = 0     #the number of stones already on the field
 
 #RL and MLP Parameters
 rl_reward = [0.0, 1.0, -1.0]    #rewards for : Draw, Win, Loose
-rl_beta = 1                     #bot_RL_MLP so ca. 1 - 5
+rl_beta = 2                    #bot_RL_MLP so ca. 1 - 5
 mlp_hidden = 10                 #number of hidden neurons
 mlp_learning_rate = 0.1         #learning-rate of the MLP
 
 #Misc Parameters
-runs = 100000               #the number of runs
+runs = 10000000               #the number of runs
 display_progress = 1000      #print status every x runs
 
 #Choose Bots
@@ -38,7 +38,8 @@ world = World_Model (size_x, size_y, size_win, gravity, initial_stones = initial
 
 #print 'W_i min :',bot_1.mlp.W_i.min(), '     W_i max :', bot_1.mlp.W_i.max()
 #print 'W_o min :',bot_1.mlp.W_o.min(), '     W_o max :', bot_1.mlp.W_o.max()
-        
+win = [[],[],[]]
+radius = []
 winner = [0,0,0]
 for counter in range (runs):
     bot_1.new_game()
@@ -59,10 +60,21 @@ for counter in range (runs):
     #Evaluate Game
     winner[int(world.get_winner())] += 1
     if ((counter % display_progress) == display_progress - 1):
+        
         print 'counter   :', counter+1, '     [draw, won, lost] :', winner
         print 'W_i min :',bot_1.mlp.W_i.min(), '     W_i max :', bot_1.mlp.W_i.max()
         print 'W_o min :',bot_1.mlp.W_o.min(), '     W_o max :', bot_1.mlp.W_o.max()
+        win[0].append(winner[0])        
+        win[1].append(winner[1])
+        win[2].append(winner[2])
+        radius.append(counter)
+        plt.plot(radius, win[0], label='Draw')
+        plt.plot(radius, win[1], label='Win')
+        plt.plot(radius, win[2], label='Lose')
+        plt.legend(loc='lower left')
+        plt.show()
         winner = [0,0,0]
+        
     
     #print 'counter   :', counter, '   steps :', steps, '     wins :', winner_1
     #print "-----", counter, "-----"
