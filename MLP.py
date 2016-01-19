@@ -42,10 +42,16 @@ class MLP:
         self.bias_output = np.random.uniform(-1.0, 1.0, (self.output_size))
 
         self.hidden = None
+        
+        self.new_game()
         #self.W_i = np.random.uniform(-0.2, 0.2, (self.input_size, self.hidden_size))
         #self.W_o = np.random.uniform(-0.2, 0.2, (self.hidden_size, self.output_size))
         #self.bias_hidden = np.random.uniform(-0.2, 0.2, (self.hidden_size))
         #self.bias_output = np.random.uniform(-0.2, 0.2, (self.output_size))
+
+    def new_game(self):
+        self.first_action = True
+        self.hidden_tic = self.hidden
 
     """
     berechnet die aktivierung nach sigmoid, return: array
@@ -93,19 +99,34 @@ class MLP:
     Ermittelt die Ausgangswerte zu den übergebenen Eingangswerten
     """
     def get_action (self, data_input):
-        if (self.hidden == None):
-            self.hidden = self.sigmoidAktivierung(self.W_i, data_input, self.bias_hidden)
-            
-        hidden = self.sigmoidAktivierung(self.W_i, data_input, self.bias_hidden)
+        self.hidden = self.hidden_tic
+        self.hidden_tic = self.sigmoidAktivierung(self.W_i, data_input, self.bias_hidden)
         
-        output = np.dot(hidden, self.W_o) + self.bias_output
+        data_output = np.dot(self.hidden_tic, self.W_o) + self.bias_output
             
-        return output  
-        
+        return data_output  
+   
     """
     Trainiert das MLP mit den Eingangswerten und dem Fehler der Ausgangswerte
     """
     def evaluate_action (self, data_input, fehler_output):
+        
+        self.counter += 1
+        steps = self.counter / self.adaption_steps
+        learning_rate = self.learning_rate * (self.adaption_rate ** steps)
+        
+        fehler_hidden = self.hidden_tic * (1.0 - self.hidden_tic) * np.dot(self.W_o, fehler_output)
+
+        hilfsm_Wo = np.outer(self.hidden_tic, fehler_output)
+        self.W_o = self.W_o + (learning_rate * hilfsm_Wo)
+
+        hilfsm_Wi = np.outer(data_input,fehler_hidden)
+        self.W_i = self.W_i + (learning_rate * hilfsm_Wi)
+        
+    """
+    Trainiert das MLP mit den Eingangswerten und dem Fehler der Ausgangswerte
+    """
+    def evaluate_action_RL (self, data_input, fehler_output):
         
         self.counter += 1
         steps = self.counter / self.adaption_steps
@@ -118,7 +139,3 @@ class MLP:
 
         hilfsm_Wi = np.outer(data_input,fehler_hidden)
         self.W_i = self.W_i + (learning_rate * hilfsm_Wi)
-        
-        self.hidden = self.sigmoidAktivierung(self.W_i, data_input, self.bias_hidden)
-        
-        

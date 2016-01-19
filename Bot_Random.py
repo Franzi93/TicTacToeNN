@@ -15,6 +15,9 @@ class Bot:
         self.bot_name = "Bot"
         pass
     
+    def new_game(self):
+        pass
+    
     def get_action(self, world):
         x = 0
         y = 0
