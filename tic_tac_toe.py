@@ -46,7 +46,8 @@ def main():
     pygame.display.set_caption('Tic-Tac-Toe')
 
     bot1 = TicTacToeBot()
-    bot1.train(10000)
+    #bot1.train(100)
+    bot1.load_data("Bot_RL_MLP.dat")
     
     #bot1.evaluate_action(...)
 
@@ -66,7 +67,7 @@ def main():
     
 
     while True:
-        print(player)
+        #bprint(player)
         
         playerWins, computerWins = gameWon(mainBoard)
 

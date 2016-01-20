@@ -8,7 +8,8 @@ Created on Tue Dec 22 11:26:56 2015
 import numpy as np
 from MLP import MLP
 from Bot_Random import Bot
-
+import json
+import time
 
 """
 Implements a Bot using Reinforced Learning in Combination with a MLP to learn playing games
@@ -20,23 +21,27 @@ expected result
 class Bot_RL_MLP (Bot):
     def __init__ (self, size_x, size_y, beta, hidden, learning_rate, reward):
         Bot.__init__(self)
+
         self.bot_name = "Bot_RL_MLP"
+        self.version = 1
+        self.counter = 0
+        self.optimization = []
+        self.reward = reward[:]
+        self.first_action = True
+        self.beta = beta
+        #hoher Wert für beta (50?): exploitation
+        #niedriger Wert für beta  : exploration
 
         self.mlp = MLP (size_x * size_y, hidden, size_x * size_y, learning_rate)
 
-        self.reward = reward[:]
-
-        #hoher Wert für beta (50?): exploitation
-        #niedriger Wert für beta  : exploration
-        self.beta = beta
-        
         self.new_game()
-        
+
     """
     Initializes a new game    
     """
     def new_game(self):
         self.first_action = True
+        self.counter += 1
         self.mlp.new_game()
         #self.info = world.get_sensor_info()
         #self.h = self.mlp.get_action_without_activation(self.info)
@@ -45,6 +50,47 @@ class Bot_RL_MLP (Bot):
         #act_vec = numpy.zeros (size_mot)
         #act_vec[act] = 1.0
         #self.q0 = self.h[self.act]
+        
+    """
+    Loads
+    """
+    def load_data(self, filename):
+        fo = open(filename , "r")
+        data = json.loads(fo.read())
+        fo.close()
+
+        if (data["bot"] == self.bot_name):
+            if (data["version"] <= self.version):
+                self.counter      = data["counter"]
+                self.optimization = data["optimization"]
+                self.reward       = data["reward"]
+                self.first_action = data["first_action"]
+                self.beta         = data["beta"]
+                self.mlp.set_data(data["MLP"])
+            else:
+                raise ValueError('dataset is not usable by Bot : different Bot identifier') 
+        else:
+            raise ValueError('dataset is not usable by this Bot version : dataset version is higher than Bot version') 
+
+        return data
+        
+    """
+    Saves
+    """
+    def save_data(self, filename):
+        data = {"bot"          : self.bot_name,
+                "version"      : self.version,
+
+                "counter"      : self.counter,
+                "optimization" : self.optimization,
+                "reward"       : self.reward,
+                "first_action" : self.first_action,
+                "beta"         : self.beta,
+                "MLP"          : self.mlp.get_data()}
+
+        fo = open(filename , "w")
+        fo.write(json.dumps(data))
+        fo.close()        
         
     """
     Returns an action depending on the given world
@@ -169,25 +215,3 @@ class Bot_RL_MLP (Bot):
             return self.reward[int(winner)]
         else:
             return 0.0
-
-    """
-    Loads 
-    """
-    #def load_data(self, filename):
-    #    fo = open(filename , "r")
-    #    #self.w_mot = json_tricks.load(fo.read())["w_mot"]
-    #    data = json_tricks.load(fo.read())
-    #    fo.close()            
-    #    
-    #    return data
-         
-    """
-    Saves
-    """
-    #def save_data(self, filename):
-    #    data = {"bot" : "Bot_RL_MLP", 
-    #            "version" : 1,
-    #            "mlp" : self.mlp}
-    #    fo = open(filename , "w")
-    #    fo.write(json_tricks.dumps(data))
-    #    fo.close()

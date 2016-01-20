@@ -6,7 +6,6 @@ Created on Tue Dec 22 11:43:54 2015
 """
 
 import random
-import json_tricks
 
 class Bot:
     info = None
@@ -27,35 +26,17 @@ class Bot:
     def evaluate_action(self, world_new):
         pass
     
-    def __get_data(self):
-        return {
-            "bot" : self.bot_name, 
-            "version" : 1
-        }
-        
-    def __set_data(self, data):
-        pass
-    
     """
     Loads 
     """
     def load_data(self, filename):
-        pass
-        #fo = open(filename , "r")
-        #data = json_tricks.load(fo.read())
-        #fo.close()            
-        
-        #return data
+        raise NotImplementedError
          
     """
     Saves
     """
     def save_data(self, filename):
-        pass
-        #data = {"version" : 1, "w_mot" : self.w_mot}
-        #fo = open(filename , "w")
-        #fo.write(json_tricks.dumps(data))
-        #fo.close()
+        raise NotImplementedError
       
 """
 On Generatino, this bot generates a random order in which he places stones on the field.

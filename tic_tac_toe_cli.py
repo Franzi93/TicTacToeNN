@@ -24,24 +24,25 @@ mlp_hidden = 10                 #number of hidden neurons
 mlp_learning_rate = 0.1         #learning-rate of the MLP
 
 #Misc Parameters
-runs = 10000000               #the number of runs
-display_progress = 1000      #print status every x runs
+runs          = 10000000      #the number of runs
+log_interval  =     1000      #print status every x runs
+save_interval =   100000
+save_filename = "Bot_RL_MLP.dat"
+draw_graph    = False
 
 #Choose Bots
-bot_1 = Bot_RL_MLP(size_x, size_y, rl_beta, mlp_hidden, mlp_learning_rate, rl_reward)
-#bot_2 = Bot_Random.Bot_Random_Static(size_x, size_y)
-bot_2 = Bot_Random.Bot_Random_Dynamic(size_x, size_y)
-
-
+bot_2 = Bot_RL_MLP(size_x, size_y, rl_beta, mlp_hidden, mlp_learning_rate, rl_reward)
+#bot_1 = Bot_Random.Bot_Random_Static(size_x, size_y)
+bot_1 = Bot_Random.Bot_Random_Dynamic(size_x, size_y)
 
 world = World_Model (size_x, size_y, size_win, gravity, initial_stones = initial_stones)
 
-#print 'W_i min :',bot_1.mlp.W_i.min(), '     W_i max :', bot_1.mlp.W_i.max()
-#print 'W_o min :',bot_1.mlp.W_o.min(), '     W_o max :', bot_1.mlp.W_o.max()
-win = [[],[],[]]
-radius = []
+win    = [[],[],[]]
+scale  = []
 winner = [0,0,0]
+
 for counter in range (runs):
+    
     bot_1.new_game()
     bot_2.new_game()
     #Play a game
@@ -59,27 +60,33 @@ for counter in range (runs):
 
     #Evaluate Game
     winner[int(world.get_winner())] += 1
-    if ((counter % display_progress) == display_progress - 1):
+    if ((counter % log_interval) == log_interval - 1):
+        
+
+        #print 'W_i min :',bot_1.mlp.W_i.min(), '     W_i max :', bot_1.mlp.W_i.max()
+        #print 'W_o min :',bot_1.mlp.W_o.min(), '     W_o max :', bot_1.mlp.W_o.max()
+    
+        if (draw_graph == True):
+            win[0].append(winner[0])        
+            win[1].append(winner[1])
+            win[2].append(winner[2])
+            scale.append(counter)
+            plt.plot(scale, win[0], label='Draw')
+            plt.plot(scale, win[1], label='Win')
+            plt.plot(scale, win[2], label='Lose')
+            plt.legend(loc='lower left')
+            plt.show()
+        
+        #bot_1.load_data("data_loose")
         
         print 'counter   :', counter+1, '     [draw, won, lost] :', winner
-        print 'W_i min :',bot_1.mlp.W_i.min(), '     W_i max :', bot_1.mlp.W_i.max()
-        print 'W_o min :',bot_1.mlp.W_o.min(), '     W_o max :', bot_1.mlp.W_o.max()
-        win[0].append(winner[0])        
-        win[1].append(winner[1])
-        win[2].append(winner[2])
-        radius.append(counter)
-        plt.plot(radius, win[0], label='Draw')
-        plt.plot(radius, win[1], label='Win')
-        plt.plot(radius, win[2], label='Lose')
-        plt.legend(loc='lower left')
-        plt.show()
         winner = [0,0,0]
         
+    if ((counter % save_interval) == save_interval - 1):
+        bot_2.save_data(save_filename)        
     
     #print 'counter   :', counter, '   steps :', steps, '     wins :', winner_1
     #print "-----", counter, "-----"
     #print world.get_winner()
     #world.print_world()
     #print 'winner :', world.get_winner(), '\n'
-
-bot_1.save_data("data")
