@@ -46,13 +46,6 @@ class Bot_RL_MLP (Bot):
         self.first_action = True
         self.counter += 1
         self.mlp.new_game()
-        #self.info = world.get_sensor_info()
-        #self.h = self.mlp.get_action_without_activation(self.info)
-        
-        #self.act = self.rand_winner (self.h, self.beta)
-        #act_vec = numpy.zeros (size_mot)
-        #act_vec[act] = 1.0
-        #self.q0 = self.h[self.act]
         
     """
     Loads
@@ -145,10 +138,6 @@ class Bot_RL_MLP (Bot):
     def evaluate_action(self, world_new):
         if (self.first_action == False):
             r = self.get_reward(world_new.get_winner())         # read reward
-
-            #Erstellen des Aktions-Vektors        
-            act_vec = np.zeros (self.mlp.input_size)
-            act_vec[self.act_tic] = 1.0
     
             #Berechnen der Q-Werte vor und nach der Aktion
             q0 = self.h[self.act]
