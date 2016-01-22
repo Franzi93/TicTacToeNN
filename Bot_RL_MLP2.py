@@ -19,8 +19,11 @@ The learning takes place in evaluate_action, where the result of the action (wor
 expected result
 """
 class Bot_RL_MLP (Bot):
-    def __init__ (self, size_x, size_y, beta, hidden, learning_rate, reward):
+    def __init__ (self, size_x, size_y, beta, hidden, learning_rate, reward, initial_field = [0], player_ID = 1):
         Bot.__init__(self)
+        
+        self.initial_field = initial_field
+        self.player_ID = player_ID
 
         self.bot_name = "Bot_RL_MLP"
         self.version = 1
@@ -61,6 +64,8 @@ class Bot_RL_MLP (Bot):
 
         if (data["bot"] == self.bot_name):
             if (data["version"] <= self.version):
+                self.player_ID    = data["player_ID"]
+                self.initial_field = data["initial_field"]
                 self.counter      = data["counter"]
                 self.optimization = data["optimization"]
                 self.reward       = data["reward"]
@@ -81,6 +86,8 @@ class Bot_RL_MLP (Bot):
         data = {"bot"          : self.bot_name,
                 "version"      : self.version,
 
+                "player_ID"    : self.player_ID,
+                "initial_field" : self.initial_field,
                 "counter"      : self.counter,
                 "optimization" : self.optimization,
                 "reward"       : self.reward,

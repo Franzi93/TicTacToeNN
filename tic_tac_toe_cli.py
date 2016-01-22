@@ -15,27 +15,32 @@ size_x     = 3          #The x-dimension of the board
 size_y     = 3          #The y-dimension of the board
 size_win   = 3          #The number of stones in a row neccessary to win
 gravity    = False      #True : only the x-position is used, the stones always fall down to the bottom-most empty field
-initial_stones = 0     #the number of stones already on the field
+initial_stones = 3     #the number of stones already on the field
 
 #RL and MLP Parameters
 rl_reward = [0.0, 1.0, -1.0]    #rewards for : Draw, Win, Loose
-rl_beta = 2                    #bot_RL_MLP so ca. 1 - 5
+rl_beta = 2                     #bot_RL_MLP so ca. 1 - 5
 mlp_hidden = 10                 #number of hidden neurons
 mlp_learning_rate = 0.1         #learning-rate of the MLP
 
 #Misc Parameters
 runs          = 10000000      #the number of runs
-log_interval  =     1000      #print status every x runs
-save_interval =   100000
+log_interval  = 1000          #print status every x runs
+save_interval = 1000
 save_filename = "Bot_RL_MLP.dat"
 draw_graph    = False
 
-#Choose Bots
-bot_2 = Bot_RL_MLP(size_x, size_y, rl_beta, mlp_hidden, mlp_learning_rate, rl_reward)
-#bot_1 = Bot_Random.Bot_Random_Static(size_x, size_y)
-bot_1 = Bot_Random.Bot_Random_Dynamic(size_x, size_y)
 
 world = World_Model (size_x, size_y, size_win, gravity, initial_stones = initial_stones)
+sensor = world.get_sensor_info()
+f = [0]*len(sensor)
+for i in range(len(sensor)):
+    f[i] = sensor[i]
+
+#Choose Bots
+bot_1 = Bot_RL_MLP(size_x, size_y, rl_beta, mlp_hidden, mlp_learning_rate, rl_reward, initial_field = f, player_ID = 1)
+bot_2 = Bot_Random.Bot_Random_Static(size_x, size_y)
+#bot_2 = Bot_Random.Bot_Random_Dynamic(size_x, size_y)
 
 win    = [[],[],[]]
 scale  = []
@@ -61,7 +66,6 @@ for counter in range (runs):
     #Evaluate Game
     winner[int(world.get_winner())] += 1
     if ((counter % log_interval) == log_interval - 1):
-        
 
         #print 'W_i min :',bot_1.mlp.W_i.min(), '     W_i max :', bot_1.mlp.W_i.max()
         #print 'W_o min :',bot_1.mlp.W_o.min(), '     W_o max :', bot_1.mlp.W_o.max()
@@ -83,7 +87,7 @@ for counter in range (runs):
         winner = [0,0,0]
         
     if ((counter % save_interval) == save_interval - 1):
-        bot_2.save_data(save_filename)        
+        bot_1.save_data(save_filename)        
     
     #print 'counter   :', counter, '   steps :', steps, '     wins :', winner_1
     #print "-----", counter, "-----"

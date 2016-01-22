@@ -11,7 +11,8 @@ import numpy as np
 Implements a tic-tac-toe game0
 """
 class World_Model:
-    stone_order = [[2,2],[1,2],[2,1],[1,1],[0,0],[0,1],[1,0],[0,2],[2,0]]
+    stone_order = [[0,1],[2,2],[1,2],[1,1],[0,0],[0,2],[1,0],[2,0],[2,1]]
+    #stone_order = [[2,2],[1,2],[2,1],[1,1],[0,0],[0,1],[1,0],[0,2],[2,0]]
     
     """
     Initialize a new world of size size_x * size_y
