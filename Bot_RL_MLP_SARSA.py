@@ -26,7 +26,7 @@ class Bot_RL_MLP (Bot):
         self.player_ID = player_ID
 
         self.bot_name = "Bot_RL_MLP"
-        self.version = 1
+        self.version = 2.0
         self.counter = 0
         self.optimization = []
         self.reward = reward[:]
@@ -92,79 +92,69 @@ class Bot_RL_MLP (Bot):
         fo.write(json.dumps(data))
         fo.close()        
         
-    """
-    Returns an action depending on the given world
-    """
-    def get_action(self, world_old):
-        self.info_tic = world_old.get_sensor_info()
-        self.h_tic = self.mlp.get_action(self.info_tic)
-        
-        #for i in range(len(self.h_tic)):
-        #    if (self.info_tic[i] > 0):
-        #        self.h_tic[i] = -100000
+    def play_game(self, world, player, train_bot):
+        world.new_init()
+        self.mlp.new_game()
 
-        #Workaround: Wenn nur noch 1 Zug möglich ist, automatisch setzen
-        moves = world_old.get_moves()
-        if (len(moves) == 1):
-            self.act_tic = moves[0]
-        else:
-            #Auswahl wiederholen bis ein gültiger Zug ausgewählt wurde        
-            validation = False
-            while (validation == False):
-                new_h_tic = []
-                for i in range(len(self.h_tic)):
-                    if (i in moves):
-                        new_h_tic.append(self.h_tic[i])
+        I = world.get_sensor_info()
+        #h = np.dot (w_mot, I)
+        hidden, h = self.mlp.get_action(I)
+        act = self.rand_winner (h, self.beta)                         # choose action
+        act_vec = np.zeros (self.mlp.output_size)
+        act_vec[act] = 1.0
+        
+        #val = numpy.dot (w_mot[act], I)                     # value before action
+        #val is q0 ***
+        val = h[act]                                         # value before action
+
+        r = 0
+   
+        #while r == 0:
+        while (world.get_winner() < 0):
+            if (world.active_player != player):
+                (x, y) = train_bot.get_action(world)
+                world.perform_action(x, y)  
+            else:
+                x = act % world.size_x
+                y = act / world.size_y
+                world.perform_action(x, y)                      # do selected action
                 
-                self.act_tic = moves[self.rand_winner (new_h_tic, self.beta)]     # choose action
-                #print self.info, self.act
-                #print "----------\n",self.h_tic, "\n",moves, "\n",new_h_tic, "\n",self.act_tic
-                x = self.act_tic % world_old.size_x
-                y = self.act_tic / world_old.size_y
-                validation = world_old.check_action(x, y)
-
-        #Umrechnen 1D -> 2D
-        x = self.act_tic % world_old.size_x
-        y = self.act_tic / world_old.size_y
+                if (world.get_winner() < 0):
+                    (x, y) = train_bot.get_action(world)
+                    world.perform_action(x, y)
+                    
+                r = self.get_reward(world.get_winner())         # read reward
+                I_tic = world.get_sensor_info()                 # read new state
         
-        #print "--------------------------"
-        #print self.h, "->", self.act, "->", x, ",", y
-        #print "--------------------------"
-        return (x, y)
+                #numpy.dot (w_mot, I_tic)
+                hidden_tic, h_tic = self.mlp.get_action(I_tic)
+                act_tic = self.rand_winner (h_tic, self.beta)                 # choose next action
         
-    """
-    Adapts the MLP considering the results (world_new) of its last action
-    """
-    def evaluate_action(self, world_new):
-        if (self.first_action == False):
-            r = self.get_reward(world_new.get_winner())         # read reward
-    
-            #Berechnen der Q-Werte vor und nach der Aktion
-            q0 = self.h[self.act]
-            q1 = self.mlp.get_action(world_new.get_sensor_info())[self.act_tic]
-    
-            #Berechnen der Belohnung auf dem neuen Feld
-            r = self.get_reward(world_new.get_winner())         # read reward
-            if  (r == self.get_reward(1)):                      # This is cleaner than defining
-                target = r                                      # target as r + 0.9 * q1,
-            else:                                               # because weights now converge.
-                target = 0.9 * q1                               # gamma = 0.9
-            delta = target - q0                                 # prediction error
-    
-            #Wichtig : nur das delta an der Position der Aktion wird als Fehler betrachtet, für alle anderen
-            #Positionen ist der Fehler 0
-            error = np.zeros (self.mlp.input_size)
-            error[self.act] = delta
-            
-            #Wichtig : Das Lernen erfolgt mittels des Fehlers und der Welt VOR der Aktion        
-            self.mlp.evaluate_action_RL(self.info, error)
-            
-            #print q0, q1, delta
+                act_vec = np.zeros (self.mlp.output_size)
+                act_vec[act] = 1.0
         
-        self.info = self.info_tic
-        self.h = self.h_tic
-        self.act = self.act_tic
-        self.first_action = False
+                #val_tic = numpy.dot (w_mot[act_tic], I_tic)     # value after action
+                #val_tic is q1 ***
+                val_tic = h_tic[act_tic]    
+        
+                if  r == 1.0:                                   # This is cleaner than defining
+                    target = r                                  # target as r + 0.9 * val_tic,
+                else:                                           # because weights now converge.
+                    target = 0.9 * val_tic                      # gamma = 0.9
+                delta = target - val                            # prediction error
+        
+                #w_mot += 0.5 * delta * numpy.outer (act_vec, I)
+                error = np.zeros (self.mlp.output_size)
+                error[act] = delta
+                #print error
+                
+                #Lernen ***
+                self.mlp.evaluate_action_RL(h, hidden, error)
+        
+                I = I_tic
+                val = val_tic
+                act = act_tic 
+                hidden = hidden_tic
 
     """
     Selects an action

@@ -8,7 +8,7 @@ Created on Fri Oct 23 16:33:00 2015
 
 from World_Model import World_Model
 import Bot_Random
-from Bot_RL_MLP2 import Bot_RL_MLP
+from Bot_RL_MLP_SARSA import Bot_RL_MLP
 import numpy as np
 
 class TicTacToeBot:
@@ -20,6 +20,7 @@ class TicTacToeBot:
         self.size_win   = 3          #The number of stones in a row neccessary to win
         self.gravity    = False      #True : only the x-position is used, the stones always fall down to the bottom-most empty field
         self.initial_stones = 0      #the number of stones already on the field
+        self.initial_field = [0]*9
         
         #RL and MLP Parameters
         self.rl_reward = [0.0, 1.0, -1.0]    #rewards for : Draw, Win, Loose
@@ -28,15 +29,16 @@ class TicTacToeBot:
         self.mlp_learning_rate = 0.1         #learning-rate of the MLP
         
         #Choose Bots
-        self.bot_1 = Bot_Random.Bot_Random_Static(3, 3)
         self.bot_2 = Bot_RL_MLP(self.size_x, self.size_y, self.rl_beta, self.mlp_hidden, self.mlp_learning_rate, self.rl_reward)
         
         self.world = World_Model (self.size_x, self.size_y, self.size_win, self.gravity, initial_stones = self.initial_stones)
         
     def load_data(self,filename):
-        self.bot_2.load_data(filename)        
+        self.bot_2.load_data(filename)      
+        self.initial_field = self.bot_2.initial_field
         
     def train(self, runs):
+        bot_1 = Bot_Random.Bot_Random_Static(3, 3)
         for counter in range (runs):
             #Play a game
             self.world.new_init(initial_stones = self.initial_stones)
@@ -44,9 +46,9 @@ class TicTacToeBot:
             #Make a move until Game ends
             while (self.world.get_winner() == -1):
                 if (self.world.active_player == 1):
-                    (x, y) = self.bot_1.get_action(self.world)
+                    (x, y) = bot_1.get_action(self.world)
                     self.world.perform_action(x, y)            
-                    self.bot_1.evaluate_action(self.world)
+                    bot_1.evaluate_action(self.world)
                 else:
                     (x, y) = self.bot_2.get_action(self.world)
                     self.world.perform_action(x, y)
