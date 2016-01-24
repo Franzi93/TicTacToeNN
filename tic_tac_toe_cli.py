@@ -27,7 +27,7 @@ mlp_learning_rate = 0.1         #learning-rate of the MLP
 runs          = 10000000      #the number of runs
 log_interval  = 1000          #print status every x runs
 save_interval = 1000
-save_filename = "b3.dat"
+save_filename = "b" + str(initial_stones) + ".dat"
 draw_graph    = False
 
 
